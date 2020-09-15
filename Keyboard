@@ -1,4 +1,6 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <conio.h>
 #include <windows.h>
 using namespace std;
@@ -7,34 +9,39 @@ using namespace std;
 
 const int WIDTH = 10;   // Константные значения (работают, как переменные, ...
 const int HEIGTH = 20;  //                       ... но их нельзя изменять)
-int item_x, item_y;     // Координаты падающего блока
+short item_x, item_y;     // Координаты падающего блока
 int item_color = 1;     // Цвет блока (может быть от 1 до 7)
-bool item[4][4] = {true}; // Здесь мы задаём структуру отображения нашего блока
+bool item[4][4]={
+    {true,true,true,true},
+    {true,true,true,true},
+    {true,true,true,true},
+    {true,true,true,true},
+}; // Здесь мы задаём структуру отображения нашего блока
                           // Этот массив будет отличаться для каждого варианта
-int item_size_x = 1, item_size_y = 1;
+short item_size_x = 4, item_size_y = 4;
 int field[HEIGTH][WIDTH] = {0};  // Поле тетриса
 
 HANDLE h; // Системная переменная-идентификатор окна.
 
 // Функция отрисовки блока на поле.
 // Используется при движении блока по полю
-void insert_item_to_field(int x, int y, bool item[4][4], int color) {
-    for (int i = 0; i < item_size_y; ++i)
-        for (int j = 0; j < item_size_x; ++j)
+void insert_item_to_field(short x, short y, bool item[4][4], int color) {
+    for (short i = 0; i < item_size_y; ++i)
+        for (short j = 0; j < item_size_x; ++j)
             if (item[i][j])
                 field[y+i][x+j] = color;
 }
 
-void remove_item_from_field(int x, int y, bool item[4][4]) {
-    for (int i = 0; i < item_size_y; ++i)
-        for (int j = 0; j < item_size_x; ++j)
+void remove_item_from_field(short x, short y, bool item[4][4]) {
+    for (short i = 0; i < item_size_y; ++i)
+        for (short j = 0; j < item_size_x; ++j)
             if (item[i][j])
                 field[y+i][x+j] = 0;
 }
 
 
 void generate_new_item() {
-    item_x = WIDTH / 2;     // Точка равноудалена от боков поля
+    item_x = rand()%WIDTH;     // Точка равноудалена от боков поля
     item_y = 0;             // 0 - самый верх поля
     insert_item_to_field(item_x, item_y, item, 1);
 }
@@ -55,33 +62,32 @@ void draw_point(int point) {
 
 void draw_field() {
     cout << "+";
-    for (int i = 0; i < HEIGTH; ++i)
+    for (short i = 0; i < HEIGTH; ++i)
         cout << "-";
     cout << "+\r\n";
-    for (int i = 0; i < HEIGTH; ++i) {
+    for (short i = 0; i < HEIGTH; ++i) {
         cout << "|";
-        for (int j = 0; j < WIDTH; ++j)
+        for (short j = 0; j < WIDTH; ++j)
             draw_point(field[i][j]);
         cout << "|";
         cout << "\r\n";   // Нужно писать так из-за ncurses
     }
     cout << "+";
-    for (int i = 0; i < HEIGTH; ++i)
+    for (short i = 0; i < HEIGTH; ++i)
         cout << "-";
     cout << "+\r\n";
 }
 
-void process_fall(int *y) { // Здесь мы реализуем падение блока вниз
-    (*y)++;
+void process_fall(short *y) { // Здесь мы реализуем падение блока вниз
+    ++(*y);
 }
 
-bool check_exit(int x, int y) {
-    if (y >= HEIGTH)
+bool check_exit(short x, short y) {
+    if (y >= HEIGTH-4)
         return true;
     else
         return false;
 }
-
 
 void process_keyboard() {
     char c = 0;
@@ -90,23 +96,27 @@ void process_keyboard() {
         item_x--;
     if (c == 'd')
         item_x++;
+    if (c == 's')
+        item_y++;
 }
-
 
 int main(){
+    srand(time(NULL));
     h = GetStdHandle(STD_OUTPUT_HANDLE);
-    generate_new_item();
     bool exit = false;
-    do {
-        system("CLS");  // Очистка всего экрана
-        draw_field();
-        remove_item_from_field(item_x, item_y, item);
-        process_fall(&item_y);
-        process_keyboard();
-        Sleep(300); // Ждём некоторое время (треть секунды)
-        insert_item_to_field(item_x, item_y, item, 1);
-        exit = check_exit(item_x, item_y);
-    } while (!exit);
+    bool round = true;
+    do{
+        generate_new_item();
+        do {
+            system("CLS");  // Очистка всего экрана
+            draw_field();
+            remove_item_from_field(item_x, item_y, item);
+            process_fall(&item_y);
+            process_keyboard();
+            Sleep(300); // Ждём некоторое время (треть секунды)
+            insert_item_to_field(item_x, item_y, item, 1);
+            exit=check_exit(item_x, item_y);
+        }while (!exit);
+    }while (round);
     return 0;
 }
-
