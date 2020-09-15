@@ -5,12 +5,10 @@
 #include <windows.h>
 using namespace std;
 
-/* Пример анимации для игры тетрис на ОС Windows */
-
-const int WIDTH = 10;   // Константные значения (работают, как переменные, ...
-const int HEIGTH = 20;  //                       ... но их нельзя изменять)
-short item_x, item_y;     // Координаты падающего блока
-int item_color = 1;     // Цвет блока (может быть от 1 до 7)
+const int WIDTH = 10;   
+const int HEIGTH = 20;  
+short item_x, item_y;    // coordinates of falling block
+int item_color = 1;     // color of block
 bool item[4][4]={
     {true,true,true,true},
     {true,true,true,true},
@@ -41,8 +39,8 @@ void remove_item_from_field(short x, short y, bool item[4][4]) {
 
 
 void generate_new_item() {
-    item_x = rand()%WIDTH;     // Точка равноудалена от боков поля
-    item_y = 0;             // 0 - самый верх поля
+    item_x = rand()%WIDTH;   // random x
+    item_y = 0;             // highest y
     insert_item_to_field(item_x, item_y, item, 1);
 }
 
@@ -70,7 +68,7 @@ void draw_field() {
         for (short j = 0; j < WIDTH; ++j)
             draw_point(field[i][j]);
         cout << "|";
-        cout << "\r\n";   // Нужно писать так из-за ncurses
+        cout << "\r\n";
     }
     cout << "+";
     for (short i = 0; i < HEIGTH; ++i)
@@ -78,7 +76,7 @@ void draw_field() {
     cout << "+\r\n";
 }
 
-void process_fall(short *y) { // Здесь мы реализуем падение блока вниз
+void process_fall(short *y) { // falling of block
     ++(*y);
 }
 
@@ -108,7 +106,7 @@ int main(){
     do{
         generate_new_item();
         do {
-            system("CLS");  // Очистка всего экрана
+            system("CLS");
             draw_field();
             remove_item_from_field(item_x, item_y, item);
             process_fall(&item_y);
