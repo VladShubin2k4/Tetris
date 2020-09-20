@@ -46,10 +46,10 @@ void generate_new_item() {
 
 void draw_point(int point) {
     switch (point) {
-    case 0: // Отрисовка пустого места
+    case 0: // drawing field
         cout << "."; break;
     case 1:
-        // Отрисовка нашего блока с другим цветом
+        // drawing block
         SetConsoleTextAttribute(h, 0x000A);
         cout << "X";
         SetConsoleTextAttribute(h, 0x0008);
@@ -111,7 +111,7 @@ int main(){
             remove_item_from_field(item_x, item_y, item);
             process_fall(&item_y);
             process_keyboard();
-            Sleep(300); // Ждём некоторое время (треть секунды)
+            Sleep(300); // wait some time
             insert_item_to_field(item_x, item_y, item, 1);
             exit=check_exit(item_x, item_y);
         }while (!exit);
