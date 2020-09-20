@@ -1,0 +1,120 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <conio.h>
+#include <windows.h>
+using namespace std;
+
+const int WIDTH = 10;   
+const int HEIGTH = 20;  
+short item_x, item_y;    // coordinates of falling block
+int item_color = 1;     // color of block
+bool item[4][4]={
+    {true,true,true,true},
+    {true,true,true,true},
+    {true,true,true,true},
+    {true,true,true,true},
+}; // Здесь мы задаём структуру отображения нашего блока
+                          // Этот массив будет отличаться для каждого варианта
+short item_size_x = 4, item_size_y = 4;
+int field[HEIGTH][WIDTH] = {0};  // Поле тетриса
+
+HANDLE h; // Системная переменная-идентификатор окна.
+
+// Func of drawing block
+// Используется при движении блока по полю
+void insert_item_to_field(short x, short y, bool item[4][4], int color) {
+    for (short i = 0; i < item_size_y; ++i)
+        for (short j = 0; j < item_size_x; ++j)
+            if (item[i][j])
+                field[y+i][x+j] = color;
+}
+
+void remove_item_from_field(short x, short y, bool item[4][4]) {
+    for (short i = 0; i < item_size_y; ++i)
+        for (short j = 0; j < item_size_x; ++j)
+            if (item[i][j])
+                field[y+i][x+j] = 0;
+}
+
+
+void generate_new_item() {
+    item_x = rand()%WIDTH;   // random x
+    item_y = 0;             // highest y
+    insert_item_to_field(item_x, item_y, item, 1);
+}
+
+void draw_point(int point) {
+    switch (point) {
+    case 0: // drawing field
+        cout << "."; break;
+    case 1:
+        // drawing block
+        SetConsoleTextAttribute(h, 0x000A);
+        cout << "X";
+        SetConsoleTextAttribute(h, 0x0008);
+        break;
+    }
+    cout << " ";
+}
+
+void draw_field() {
+    cout << "+";
+    for (short i = 0; i < HEIGTH; ++i)
+        cout << "-";
+    cout << "+\r\n";
+    for (short i = 0; i < HEIGTH; ++i) {
+        cout << "|";
+        for (short j = 0; j < WIDTH; ++j)
+            draw_point(field[i][j]);
+        cout << "|";
+        cout << "\r\n";
+    }
+    cout << "+";
+    for (short i = 0; i < HEIGTH; ++i)
+        cout << "-";
+    cout << "+\r\n";
+}
+
+void process_fall(short *y) { // falling of block
+    ++(*y);
+}
+
+bool check_exit(short x, short y) {
+    if (y >= HEIGTH-4)
+        return true;
+    else
+        return false;
+}
+
+void process_keyboard() {
+    char c = 0;
+    if (kbhit()) c = getch();
+    if (c == 'a')
+        item_x--;
+    if (c == 'd')
+        item_x++;
+    if (c == 's')
+        item_y++;
+}
+
+int main(){
+    srand(time(NULL));
+    h = GetStdHandle(STD_OUTPUT_HANDLE);
+    bool exit = false;
+    bool round = true;
+    do{
+        generate_new_item();
+        do {
+            system("CLS");
+            draw_field();
+            remove_item_from_field(item_x, item_y, item);
+            process_fall(&item_y);
+            process_keyboard();
+            Sleep(300); // wait some time
+            insert_item_to_field(item_x, item_y, item, 1);
+            exit=check_exit(item_x, item_y);
+        }while (!exit);
+    }while (round);
+    return 0;
+}
